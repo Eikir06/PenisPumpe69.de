@@ -1,0 +1,31 @@
+ {% extends 'base.html' %}
+
+    {% block content %}
+        <h1>Registrieren</h1>
+
+        <form action="{{ url_for('register') }}" method="POST">
+            <div class="name-box">
+                <input type="text" id="prename-field" class="name-input" name="prename" placeholder="Vorname eingeben..." required>
+            </div>
+    
+            <div class="name-box">
+                <input type="text" id="name-field" class="name-input" name="lastname" placeholder="Name eingeben..." required>
+            </div>
+    
+            <div class="name-box">
+                <input type="text" id="username-field" class="name-input" name="username" placeholder="Benutzername eingeben..." required>
+            </div>
+    
+            <div class="name-box">
+                <input type="password" id="passwort-field" class="name-input" name="password" placeholder="Passwort eingeben..." required>
+            </div>
+    
+            <div class="name-box">
+                <input type="email" id="mail-field" class="name-input" name="email" placeholder="E-Mail Adresse eingeben..." required>
+            </div>
+    
+            <div class="register-right-bottom-2">
+                <button type="submit" class="register-button-2">Registrieren</button>
+            </div>
+        </form>
+    {% endblock %}

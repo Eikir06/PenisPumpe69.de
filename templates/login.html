@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Login</h1>
+
+<form method="POST"> 
+    <div class="name-box">
+        <input type="text" id="username-field" name="username" class="name-input" placeholder="Benutzername eingeben..." required>
+    </div>
+
+    <div class="name-box">
+        <input type="password" id="passwort-field" name="password" class="name-input" placeholder="Passwort eingeben..." required>
+    </div>
+
+    <div class="login-right-bottom">
+        <button type="submit" class="login-button-2">Einloggen</button> <!-- Button zum Absenden des Formulars -->
+    </div>
+
+    <div class="login-left-bottom">
+        <a class="register-button" href="{{ url_for('register') }}">Registrieren</a>
+    </div>
+</form>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="red-text" style="margin-top: 20px;">{{ messages[0] }}</div>
+    {% endif %}
+    {% endwith %} 
+{% endblock %}
+
+

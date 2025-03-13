@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PenisPumpe69{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('homepage') }}"><img src="static/images/Logo3.png" alt="Logo3"></a>
+        </div>
+        <nav>
+            <a href="{{ url_for('portfolio') }}">Portfolio</a>
+            <a href="{{ url_for('projekte') }}">Projekte</a>
+            <a href="{{ url_for('shop') }}">Shop</a>
+            <a href="{{ url_for('soziales') }}">Soziales</a>
+        </nav>
+        <div class="header-right">
+            <img id="dark-light-toggle" src="static/images/dark_light_mode.svg" alt="Dark/Light Mode" onclick="toggleDarkMode()">
+            <!-- Profil-Icon mit Dropdown-Menü -->
+            <div class="profile-dropdown">
+                <img src="static/images/profile-icon.svg" alt="Profil" class="profile-icon" id="profileIcon">
+                <div class="dropdown-content" id="dropdownMenu">
+                    {% if session.get('logged_in') %}
+                        <a href="/profile">Profil</a>
+                        <a href="/logout">Abmelden</a>
+                    {% else %}
+                        <a href="/login">Anmelden</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            
+    </header>
+
+<main>
+    {% block content %}
+    <!-- Der Inhalt der jeweiligen Seite wird hier eingefügt -->
+    {% endblock %}
+</main>
+<!--
+<footer>
+    <div class="footer-container">
+        <p>© 2024 PenisPumpe69</p>
+        <p><a href="{{ url_for('impressum') }}">Impressum & Kontakt</a></p>
+        <p>Email: kontakt@deinewebsite.de</p>
+        <p>Telefon: +49 123 456 789</p>
+    </div>
+</footer>
+-->
+</body>
+</html>
