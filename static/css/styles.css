@@ -24,6 +24,7 @@ header {
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
 }
 
 /* Container für den Anmelde-Button */
@@ -103,7 +104,7 @@ nav a:hover {
 
 /* Buttons */
 .btn-custom {
-    background: #0288d1;
+    background: #0277bd;
     color: white;
     padding: 12px 24px;
     border-radius: 5px;
@@ -165,7 +166,7 @@ body.dark-mode .btn-custom:hover {
 }
 
 body.dark-mode .portfolio-item {
-    background: #455a64;
+    background: #37474f;
     color: white;
 }
 
@@ -182,7 +183,7 @@ body.dark-mode .portfolio-item {
 }
 
 body.dark-mode .portfolio-details {
-    background: #546e7a;
+    background: #37474f;
     color: white;
 }
 
@@ -249,15 +250,37 @@ body.dark-mode .expand-icon {
     align-items: center;
     gap: 15px;
     margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
 }
 
-/* Gemeinsames Design für beide Buttons */
-.login-button-2, .register-button, .register-button-2 {
-    background: #009cf6; /* Hintergrundfarbe */
-    color: white; /* Textfarbe */
-    padding: 10px 20px; /* Innenabstand */
-    text-decoration: none; /* Kein Unterstrich */
-    border-radius: 5px; /* Abgerundete Ecken */
+/* Container für die Buttons */
+.login-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Positionierung der Buttons */
+.login-button-2 {
+    background: #0277bd;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 17px;
+    font-weight: bold;
+    transition: background 0.3s ease-in-out;
+    box-shadow: 4px 4px 10px darkgrey;
+    border: none;
+}
+
+.register-button {
+    background: #0277bd;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
     transition: background 0.3s ease-in-out;
@@ -266,7 +289,7 @@ body.dark-mode .expand-icon {
 
 /* Hover-Effekt */
 .login-button-2:hover, .register-button:hover, .register-button-2:hover {
-    background: #007acc; /* Dunklere Farbe beim Darüberfahren */
+    background: #0277bd; /* Dunklere Farbe beim Darüberfahren */
 }
 
 /* Positionierung des Login-Buttons */
@@ -314,7 +337,7 @@ body:not(.dark-mode) #dark-light-toggle {
 }
 
 body.dark-mode .project-list {
-    background: #546e7a;
+    background: #37474f;
     color: white;
 }
 
@@ -322,4 +345,203 @@ body.dark-mode .project-list {
 h1, h2 {
     text-align: center;
     font-weight: 500;
+}
+
+/* Profilseite */
+.profile-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Profilbild */
+.profile-image img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #0277bd;
+    filter: brightness(0.8);
+}
+
+/* Profildetails */
+.profile-details {
+    flex-grow: 1;
+}
+
+.profile-details h1 {
+    margin-bottom: 10px;
+}
+
+.profile-projects {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-projects table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.profile-projects th, .profile-projects td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+.profile-projects th {
+    background: #0277bd;
+    color: white;
+}
+
+.profile-projects .btn-custom, .btn-delete {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.btn-delete {
+    background: #d32f2f;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #b71c1c;
+}
+
+/* Profilseite - Dark Mode */
+body.dark-mode .profile-container,
+body.dark-mode .profile-projects {
+    background: #37474f;
+    color: white;
+}
+
+body.dark-mode .profile-image img {
+    filter: brightness(0.9);
+}
+
+body.dark-mode .profile-projects {
+    background: #37474f;
+}
+
+.profile-portfolio {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-portfolio table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.profile-portfolio th, .profile-portfolio td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+.profile-portfolio th {
+    background: #0277bd;
+    color: white;
+}
+
+.profile-portfolio .btn-custom, .btn-delete {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.btn-delete {
+    background: #d32f2f;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #b71c1c;
+}
+
+/* Profilseite - Dark Mode */
+body.dark-mode .profile-portfolio {
+    background: #37474f;
+    color: white;
+}
+
+body.dark-mode .profile-portfolio {
+    background: #37474f;
+}
+
+/* Hauptcontainer für den Shop */
+.shop-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Raster-Layout für die Shop-Artikel */
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Einzelne Shop-Artikel als Kacheln */
+.shop-item {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.shop-item:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.shop-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    height: 70px;
+    width: 70px;
+    filter: brightness(0.9);
+}
+
+.shop-item h3 {
+    margin: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.shop-item .price {
+    font-size: 18px;
+    color: #0277bd;
+    font-weight: bold;
+}
+
+.shop-item .btn-custom {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
 }
