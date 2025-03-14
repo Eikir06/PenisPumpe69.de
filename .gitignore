@@ -1,0 +1,24 @@
+# Node-Module, Logs und System-Dateien
+node_modules/
+npm-debug.log
+yarn.lock
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE-spezifische Dateien
+.vscode/
+.idea/
+
+# Temporäre und Build-Dateien
+dist/
+build/
+.env
+
+# Ausdrücklich KEINE .db-Dateien ignorieren
+!*.db
