@@ -28,8 +28,12 @@
                     {% if session.get('logged_in') %}
                         <a href="/profile">Profil</a>
                         <a href="/logout">Abmelden</a>
+                            {% if session.get('role') == 'Administrator' %}
+                                <a href="/admin">Adminbereich</a>  
+                            {% endif %}
+
                     {% else %}
-                        <a href="/login">Anmelden</a>
+                        <a href="/login">Anmelden</a>  
                     {% endif %}
                 </div>
             </div>
