@@ -1,10 +1,51 @@
 {% extends 'base.html' %}
 
-    {% block content %}
+{% block content %}
+<div class="shop-container">
     <h1>Shop</h1>
-    <p>Hier kannst du bald Produkte kaufen.</p>
-    <ul>
-        <li><strong>Produkt 1:</strong> Entwickler-Board ESP32</li>
-        <li><strong>Produkt 2:</strong> Arduino Starter-Kit</li>
-    </ul>
-    {% endblock %}
+
+    <!-- Produkt-Grid -->
+    <div class="shop-grid">
+        <div class="shop-item">
+            <img src="{{ url_for('static', filename='images/iconmonstr-product-3.svg') }}" alt="Produkt 1">
+            <h3>Produkt 1</h3>
+            <p class="price">19,99 €</p>
+            <button class="btn-custom">In den Warenkorb</button>
+        </div>
+
+        <div class="shop-item">
+            <img src="{{ url_for('static', filename='images/iconmonstr-product-3.svg') }}" alt="Produkt 2">
+            <h3>Produkt 2</h3>
+            <p class="price">24,99 €</p>
+            <button class="btn-custom">In den Warenkorb</button>
+        </div>
+
+        <div class="shop-item">
+            <img src="{{ url_for('static', filename='images/iconmonstr-product-3.svg') }}" alt="Produkt 3">
+            <h3>Produkt 3</h3>
+            <p class="price">19,99 €</p>
+            <button class="btn-custom">In den Warenkorb</button>
+        </div>
+
+        <div class="shop-item">
+            <img src="{{ url_for('static', filename='images/iconmonstr-product-3.svg') }}" alt="Produkt 4">
+            <h3>Produkt 4</h3>
+            <p class="price">34,99 €</p>
+            <button class="btn-custom">In den Warenkorb</button>
+        </div>
+
+        <div class="shop-item">
+            <img src="{{ url_for('static', filename='images/iconmonstr-product-3.svg') }}" alt="Produkt 5">
+            <h3>Produkt 5</h3>
+            <p class="price">29,99 €</p>
+            <button class="btn-custom">In den Warenkorb</button>
+        </div>
+
+        <div class="shop-item">
+            <img src="{{ url_for('static', filename='images/iconmonstr-product-3.svg') }}" alt="Produkt 6">
+            <h3>Produkt 6</h3>
+            <p class="price">39,99 €</p>
+            <button class="btn-custom">In den Warenkorb</button>
+        </div>
+    </div>
+{% endblock %}

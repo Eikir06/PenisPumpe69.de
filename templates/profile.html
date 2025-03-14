@@ -1,5 +1,89 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    
+<div class="profile-container">
+    <!-- Profilbild -->
+    <div class="profile-image">
+        <img src="{{ url_for('static', filename='images/profile-icon.svg') }}" alt="Profilbild">
+    </div>
+
+    <!-- Profildetails -->
+    <div class="profile-details">
+        <h1>Max Mustermann</h1>
+        <p>Vorname</p>
+        <p>Nachname</p>
+        <p>Benutzername</p>
+        <p>Passwort</p>
+        <p>Email: max.mustermann@example.com</p>
+        <p>Mitglied seit: 01.01.2024</p>
+        <button class="btn-custom">Profil bearbeiten</button>
+    </div>
+</div>
+
+<!-- Projektverwaltung -->
+<div class="profile-projects">
+    <h2>Meine Projekte</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Projektname</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Projekt A</td>
+                <td>
+                    <a href="#" class="btn-custom">Bearbeiten</a>
+                    <a href="#" class="btn-delete">Löschen</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Projekt B</td>
+                <td>
+                    <a href="#" class="btn-custom">Bearbeiten</a>
+                    <a href="#" class="btn-delete">Löschen</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="#" class="btn-custom">Neues Projekt erstellen</a>
+</div>
+
+<!-- Portfolio-Verwaltung -->
+<div class="profile-portfolio">
+    <h2>Mein Portfolio</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Portfolioabschnitt</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Über mich</td>
+                <td>
+                    <a href="#" class="btn-custom">Bearbeiten</a>
+                    <a href="#" class="btn-delete">Löschen</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Fähigkeiten</td>
+                <td>
+                    <a href="#" class="btn-custom">Bearbeiten</a>
+                    <a href="#" class="btn-delete">Löschen</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Erfahrungen</td>
+                <td>
+                    <a href="#" class="btn-custom">Bearbeiten</a>
+                    <a href="#" class="btn-delete">Löschen</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="#" class="btn-custom">Neuen Abschnitt erstellen</a>
+</div>
 {% endblock %}

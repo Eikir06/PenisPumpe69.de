@@ -12,19 +12,15 @@
         <input type="password" id="passwort-field" name="password" class="name-input" placeholder="Passwort eingeben..." required>
     </div>
 
-    <div class="login-right-bottom">
-        <button type="submit" class="login-button-2">Einloggen</button> <!-- Button zum Absenden des Formulars -->
-    </div>
-
-    <div class="login-left-bottom">
+    <div class="login-buttons-container">
         <a class="register-button" href="{{ url_for('register') }}">Registrieren</a>
+        <button type="submit" class="login-button-2">Einloggen</button>
     </div>
 </form>
+
 {% with messages = get_flashed_messages() %}
     {% if messages %}
     <div class="red-text" style="margin-top: 20px;">{{ messages[0] }}</div>
     {% endif %}
-    {% endwith %} 
+{% endwith %}
 {% endblock %}
-
-
