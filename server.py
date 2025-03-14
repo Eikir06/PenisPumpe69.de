@@ -149,5 +149,29 @@ def admin():
         return redirect(url_for('homepage'))  # Zur Startseite umleiten
     return render_template('admin.html')
 
+@app.route('/convert')
+def convert():
+    return render_template('convert.html')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        flash('Keine Datei ausgewählt.', 'error')
+        return redirect(request.url)
+
+    file = request.files['file']
+
+    if file.filename == '':
+        flash('Keine Datei ausgewählt.', 'error')
+        return redirect(request.url)
+
+    if file:
+        filepath = os.path.join('uploads', file.filename)
+        file.save(filepath)
+        flash('Datei erfolgreich hochgeladen!', 'success')
+        return redirect(url_for('convert'))  # Oder eine andere Seite
+
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

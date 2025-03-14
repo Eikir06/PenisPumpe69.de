@@ -64,3 +64,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+function updateFileName(input) {
+    const fileName = input.files.length > 0 ? input.files[0].name : "Keine Datei ausgewählt";
+    document.getElementById("file-name").textContent = fileName;
+}

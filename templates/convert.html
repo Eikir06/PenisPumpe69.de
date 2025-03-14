@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Projektverwaltung -->
+<div class="convert-interface">
+    <h2>Dateiconverter</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Orginaldatei</th>
+                <th>Konvertiert</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+                        <label for="file-upload" class="custom-file-upload">
+                            Datei auswählen
+                        </label>
+                        <input id="file-upload" type="file" name="file" required onchange="updateFileName(this)">
+                        
+                        <!-- Hier wird der Dateiname angezeigt -->
+                        <span id="file-name">Keine Datei ausgewählt</span>
+
+                        <button type="submit" class="btn-convert">Konvertieren</button>
+
+                    </form>                    
+                </td>
+                <td>
+                    <a href="#" class="btn-delete-2">Löschen</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

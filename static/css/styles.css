@@ -104,17 +104,18 @@ nav a:hover {
 
 /* Buttons */
 .btn-custom {
-    background: #0277bd;
+    background: #027ec5;
     color: white;
     padding: 12px 24px;
     border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
     transition: background 0.3s;
+    border: none;
 }
 
 .btn-custom:hover {
-    background: #0277bd;
+    background: #027ec5;
 }
 
 /* Dark Mode Styles */
@@ -307,7 +308,7 @@ body.dark-mode .expand-icon {
 
 /* Hover-Effekt */
 .login-button-2:hover, .register-button:hover, .register-button-2:hover {
-    background: #0277bd; /* Dunklere Farbe beim Darüberfahren */
+    background: #027ec5; /* Dunklere Farbe beim Darüberfahren */
 }
 
 /* Positionierung des Login-Buttons */
@@ -559,9 +560,125 @@ body.dark-mode .profile-portfolio {
     font-weight: bold;
 }
 
-.shop-item .btn-custom {
+.shop-item .btn-convert {
     width: 100%;
     margin-top: 10px;
     padding: 10px 15px;
     font-size: 16px;
+}
+
+.convert-interface {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.convert-interface table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.convert-interface th, .convert-interface td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+.convert-interface th {
+    background: #0277bd;
+    color: white;
+}
+
+.convert-interface .btn-convert, .btn-delete-2 {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+}
+
+.btn-delete-2 {
+    background: #d32f2f;
+    color: white;
+}
+
+.btn-delete-2:hover {
+    background: #b71c1c;
+}
+
+/* Buttons */
+.btn-convert {
+    background: #0277bd;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-convert:hover {
+    background: #027ec5;
+}
+
+.btn-delete-2 {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+}
+
+.btn-delete-2 {
+    background: #d32f2f;
+    color: white;
+}
+
+.btn-delete-2:hover {
+    background: #b71c1c;
+}
+
+/* Verstecktes Original-Input */
+input[type="file"] {
+    display: none;
+}
+
+/* Angepasstes Label als Button */
+.custom-file-upload {
+    background-color: #0277bd;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.custom-file-upload:hover {
+    background-color: #027ec5;
+}
+
+/* Dateiname */
+#file-name {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Buttons */
+.btn-profile-delete {
+    background: #d32f2f;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s;
+    border: none;
+}
+
+.btn-profile-delete:hover {
+    background: #b71c1c;
 }
