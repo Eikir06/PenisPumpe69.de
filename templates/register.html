@@ -2,7 +2,7 @@
 
     {% block content %}
         <h1>Registrieren</h1>
-
+        <p class="register-text"> Registriere dich jetzt kostenlos, um eigene Projekte und ein Portfolio anzulegen.</p>
         <form action="{{ url_for('register') }}" method="POST">
             <div class="name-box">
                 <input type="text" id="prename-field" class="name-input" name="prename" placeholder="Vorname eingeben..." required>
