@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 app = Flask(__name__)
@@ -21,20 +22,11 @@ class User(db.Model):
     lastname = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)  # In einer echten App: Hashing verwenden!
+    password = db.Column(db.String(255), nullable=False)  # Passwort wird jetzt gehasht gespeichert!
 
 # ** Datenbank erstellen, falls nicht vorhanden **
 with app.app_context():
     db.create_all()
-
-# ** Benutzer-Datenbank (vorübergehend in einem Dictionary gespeichert) **
-users = {}
-
-# Beispiel-Benutzer für Login (wird später durch DB ersetzt)
-USER_CREDENTIALS = {
-    "username": "admin",
-    "password": "1234"
-}
 
 @app.route('/')
 def homepage():
@@ -49,7 +41,8 @@ def login():
         # Benutzer aus der SQLite-Datenbank abrufen
         user = User.query.filter_by(username=username).first()
 
-        if user and user.password == password:  # Passwort-Überprüfung (später mit Hashing!)
+        # Passwortprüfung mit Hashing
+        if user and check_password_hash(user.password, password):  
             session['logged_in'] = True
             session['username'] = user.username  # Username in Session speichern
             flash('Erfolgreich eingeloggt!', 'success')
@@ -76,7 +69,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# ** Registrierungsseite (speichert Benutzer in SQLite) **
+# ** Registrierungsseite mit Passwort-Hashing **
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -92,8 +85,9 @@ def register():
             flash('Benutzername bereits vergeben!', 'error')
             return redirect(url_for('register'))
 
-        # Benutzer in SQLite speichern
-        new_user = User(prename=prename, lastname=lastname, username=username, email=email, password=password)
+        # Passwort hashen & Benutzer speichern
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
+        new_user = User(prename=prename, lastname=lastname, username=username, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -130,5 +124,5 @@ def impressum():
     return render_template('impressum.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
