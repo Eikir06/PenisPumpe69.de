@@ -592,21 +592,12 @@ body.dark-mode .profile-portfolio {
     color: white;
 }
 
-.convert-interface .btn-convert, .btn-delete-2 {
+.convert-interface .btn-convert, {
     padding: 8px 15px;
     font-size: 14px;
     border-radius: 5px;
     border: none;
     outline: none;
-}
-
-.btn-delete-2 {
-    background: #d32f2f;
-    color: white;
-}
-
-.btn-delete-2:hover {
-    background: #b71c1c;
 }
 
 /* Buttons */
@@ -618,27 +609,15 @@ body.dark-mode .profile-portfolio {
     font-size: 16px;
     font-weight: bold;
     transition: background 0.3s;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    margin-left: auto; /* Schiebt den Button ganz nach rechts */
+    float: right;
 }
 
 .btn-convert:hover {
     background: #027ec5;
-}
-
-.btn-delete-2 {
-    padding: 8px 15px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: none;
-    outline: none;
-}
-
-.btn-delete-2 {
-    background: #d32f2f;
-    color: white;
-}
-
-.btn-delete-2:hover {
-    background: #b71c1c;
 }
 
 /* Verstecktes Original-Input */
@@ -681,4 +660,10 @@ input[type="file"] {
 
 .btn-profile-delete:hover {
     background: #b71c1c;
+}
+
+/* Überschriften linksbündig */
+.convert-interface th {
+    text-align: left;
+    margin-bottom: 20px;
 }
