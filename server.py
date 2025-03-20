@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
@@ -15,6 +16,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# ** Upload-Konfiguration **
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'mp4', 'avi', 'mkv', 'mov', 'webm', 'mp3', 'wav', 'ogg', 'aac', 'pdf', 'docx', 'txt', 'html', 'epub', 'odt', 'pages'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 # ** Datenbank-Modelle definieren **
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,16 +36,14 @@ class User(db.Model):
 with app.app_context():
     db.create_all()
 
-# ** Benutzer-Datenbank (vorübergehend in einem Dictionary gespeichert) **
-users = {}
-
+# ** Benutzer-Datenbank (Test-Benutzer) **
 user_data = {
-    "Test12": {"password": "12345", "role": "Administrator"},
+    "Test12": {"password": generate_password_hash("12345"), "role": "Administrator"},
 }
 
 @app.route('/')
 def homepage():
-    return render_template('index.html')  # Startseite auf '/' setzen
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -48,20 +54,18 @@ def login():
         # Prüfe zuerst, ob der Benutzer in der Datenbank existiert
         user = User.query.filter_by(username=username).first()
 
-        if user and user.password == password:
+        if user and check_password_hash(user.password, password):
             session['logged_in'] = True
             session['username'] = user.username
             session['role'] = "Administrator" if user.username == "Test12" else "Nutzer"
-
             flash('Erfolgreich eingeloggt!', 'success')
             return redirect(url_for('homepage'))
         
         # Falls der Benutzer nicht in der DB ist, prüfe das Test-Dictionary
-        elif username in user_data and user_data[username]["password"] == password:
+        elif username in user_data and check_password_hash(user_data[username]["password"], password):
             session['logged_in'] = True
             session['username'] = username
             session['role'] = user_data[username]["role"]
-
             flash('Erfolgreich eingeloggt! (Testmodus)', 'success')
             return redirect(url_for('homepage'))
 
@@ -72,7 +76,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.clear()  # Sitzung zurücksetzen
+    session.clear()
     flash('Sie wurden erfolgreich ausgeloggt.')
     return redirect(url_for('login'))
 
@@ -81,7 +85,7 @@ def login_required(f):
     from functools import wraps
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('logged_in'):  # Wenn der Benutzer nicht eingeloggt ist
+        if not session.get('logged_in'):
             flash('Bitte loggen Sie sich zuerst ein.')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
@@ -97,13 +101,11 @@ def register():
         email = request.form['email']
         password = request.form['password']
 
-        # Prüfen, ob der Benutzername bereits existiert
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash('Benutzername bereits vergeben!', 'error')
             return redirect(url_for('register'))
 
-        # Passwort hashen & Benutzer speichern
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
         new_user = User(prename=prename, lastname=lastname, username=username, email=email, password=hashed_password)
         db.session.add(new_user)
@@ -113,6 +115,52 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+# ** Datei-Upload-Funktionen **
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/convert')
+def convert():
+    return render_template('convert.html')
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('Keine Datei ausgewählt.', 'error')
+            return redirect(request.url)
+
+        file = request.files['file']
+
+        if file.filename == '':
+            flash('Keine Datei ausgewählt.', 'error')
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            flash('Datei erfolgreich hochgeladen!', 'success')
+            return redirect(url_for('uploaded_file', filename=filename))
+        else:
+            flash('Ungültiger Dateityp.', 'error')
+            return redirect(request.url)
+
+    return render_template('upload.html')
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# ** Admin-Seite **
+@app.route('/admin')
+@login_required
+def admin():
+    if session.get('role') != 'Administrator':
+        flash('Zugriff verweigert: Nur Administratoren dürfen diese Seite aufrufen.', 'error')
+        return redirect(url_for('homepage'))
+    return render_template('admin.html')
 
 # ** Beispielseiten **
 @app.route('/portfolio')
@@ -140,38 +188,6 @@ def profile():
 @app.route('/impressum')
 def impressum():
     return render_template('impressum.html')
-
-@app.route('/admin')
-@login_required
-def admin():
-    if session.get('role') != 'Administrator':
-        flash('Zugriff verweigert: Nur Administratoren dürfen diese Seite aufrufen.', 'error')
-        return redirect(url_for('homepage'))  # Zur Startseite umleiten
-    return render_template('admin.html')
-
-@app.route('/convert')
-def convert():
-    return render_template('convert.html')
-
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        flash('Keine Datei ausgewählt.', 'error')
-        return redirect(request.url)
-
-    file = request.files['file']
-
-    if file.filename == '':
-        flash('Keine Datei ausgewählt.', 'error')
-        return redirect(request.url)
-
-    if file:
-        filepath = os.path.join('uploads', file.filename)
-        file.save(filepath)
-        flash('Datei erfolgreich hochgeladen!', 'success')
-        return redirect(url_for('convert'))  # Oder eine andere Seite
-
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
