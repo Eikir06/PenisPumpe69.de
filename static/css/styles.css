@@ -667,3 +667,83 @@ input[type="file"] {
     text-align: left;
     margin-bottom: 20px;
 }
+
+.chat-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box; /* Sicherstellen, dass Padding und Border nicht die Breite beeinflussen */
+}
+
+.filter-container {
+    margin-bottom: 10px;
+}
+
+.chat-box {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.chat-message {
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #e3f2fd;
+    border-radius: 5px;
+    width: auto; /* Die Breite passt sich automatisch dem Inhalt an */
+    max-width: 70%; /* Maximal 70% der Container-Breite */
+    word-wrap: break-word; /* Text wird innerhalb der Nachricht umgebrochen */
+    box-sizing: border-box; /* Padding wird in der Breite berücksichtigt */
+}
+
+.my-message {
+    background: #bbdefb;
+    align-self: flex-end;
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.timestamp {
+    font-size: 12px;
+    color: gray;
+    margin-right: 5px;
+}
+
+.message-input {
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.message-input input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.message-input button {
+    padding: 10px 15px;
+    border: none;
+    background: #0277bd;
+    color: white;
+    border-radius: 5px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+
