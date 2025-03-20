@@ -1,10 +1,30 @@
 {% extends 'base.html' %}
 
-    {% block content %}
-    <h1>Soziales</h1>
-    <p>Hier kannst du mit anderen Mitgliedern interagieren.</p>
-    <ul>
-        <li><strong>Diskussion:</strong> Zukunft der Webentwicklung</li>
-        <li><strong>Event:</strong> Online Hackathon 2024</li>
-    </ul>
-    {% endblock %}
+{% block content %}
+<div class="chat-container">
+    <h1>Community Chat</h1>
+    
+    <!-- Themenfilter -->
+    <div class="filter-container">
+        <label for="chat-filter">Thema wählen:</label>
+        <select id="chat-filter" onchange="filterMessages()">
+            <option value="all">Alle Nachrichten</option>
+            <option value="tech">Technologie</option>
+            <option value="gaming">Gaming</option>
+            <option value="movies">Filme & Serien</option>
+            <option value="random">Allgemein</option>
+        </select>
+    </div>
+    
+    <!-- Nachrichtenbox -->
+    <div class="chat-box" id="chat-box">
+        <!-- Nachrichten werden hier dynamisch eingefügt -->
+    </div>
+    
+    <!-- Eingabefeld für neue Nachrichten -->
+    <div class="message-input">
+        <input type="text" id="message-input" placeholder="Nachricht eingeben...">
+        <button onclick="sendMessage()">Senden</button>
+    </div>
+</div>
+{% endblock %}
