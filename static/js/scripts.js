@@ -69,3 +69,43 @@ function updateFileName(input) {
     const fileName = input.files.length > 0 ? input.files[0].name : "Keine Datei ausgewählt";
     document.getElementById("file-name").textContent = fileName;
 }
+
+let messages = [
+    { text: "Willkommen im Chat!", category: "random", timestamp: "10:00", sender: "other" },
+    { text: "Hat jemand neue Gaming-News?", category: "gaming", timestamp: "10:05", sender: "other" },
+    { text: "Der neue AI-Artikel ist super!", category: "tech", timestamp: "10:10", sender: "other" },
+];
+
+function renderMessages(filter = "all") {
+    const chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML = "";
+    messages
+        .filter(msg => filter === "all" || msg.category === filter)
+        .forEach(msg => {
+            const msgElement = document.createElement("div");
+            msgElement.classList.add("chat-message");
+            if (msg.sender === "me") {
+                msgElement.classList.add("my-message");
+            }
+            msgElement.innerHTML = `<span class="timestamp">${msg.timestamp}</span> ${msg.text}`;
+            chatBox.appendChild(msgElement);
+        });
+}
+
+function filterMessages() {
+    const filter = document.getElementById("chat-filter").value;
+    renderMessages(filter);
+}
+
+function sendMessage() {
+    const input = document.getElementById("message-input");
+    const text = input.value.trim();
+    if (text !== "") {
+        const category = document.getElementById("chat-filter").value;
+        messages.push({ text, category, timestamp: new Date().toLocaleTimeString().slice(0, 5), sender: "me" });
+        input.value = "";
+        renderMessages(category);
+    }
+}
+
+renderMessages();
