@@ -77,18 +77,24 @@ let messages = [
 ];
 
 function renderMessages(filter = "all") {
-    const chatBox = document.getElementById("chat-box");
-    chatBox.innerHTML = "";
-    messages
-        .filter(msg => filter === "all" || msg.category === filter)
-        .forEach(msg => {
-            const msgElement = document.createElement("div");
-            msgElement.classList.add("chat-message");
-            if (msg.sender === "me") {
-                msgElement.classList.add("my-message");
-            }
-            msgElement.innerHTML = `<span class="timestamp">${msg.timestamp}</span> ${msg.text}`;
-            chatBox.appendChild(msgElement);
+    fetch("/get_messages")
+        .then(res => res.json())
+        .then(data => {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = "";
+
+            data
+                .filter(msg => filter === "all" || msg.category === filter)
+                .reverse()
+                .forEach(msg => {
+                    const msgElement = document.createElement("div");
+                    msgElement.classList.add("chat-message");
+                    if (msg.username === document.getElementById("profileIcon")?.dataset.username) {
+                        msgElement.classList.add("my-message");
+                    }
+                    msgElement.innerHTML = `<span class="timestamp">${msg.timestamp}</span> <strong>${msg.username}:</strong> ${msg.text}`;
+                    chatBox.appendChild(msgElement);
+                });
         });
 }
 
@@ -100,11 +106,28 @@ function filterMessages() {
 function sendMessage() {
     const input = document.getElementById("message-input");
     const text = input.value.trim();
+    const category = document.getElementById("chat-filter").value;
+
     if (text !== "") {
-        const category = document.getElementById("chat-filter").value;
-        messages.push({ text, category, timestamp: new Date().toLocaleTimeString().slice(0, 5), sender: "me" });
-        input.value = "";
-        renderMessages(category);
+        fetch("/send_message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+                text: text,
+                category: category
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                input.value = "";
+                filterMessages();  // neu rendern mit aktuellem Filter
+            } else {
+                alert(data.error);
+            }
+        });
     }
 }
 

@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+import shutil
+import datetime
 
 app = Flask(__name__)
 
@@ -18,10 +20,21 @@ db = SQLAlchemy(app)
 
 # ** Upload-Konfiguration **
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'mp4', 'avi', 'mkv', 'mov', 'webm', 'mp3', 'wav', 'ogg', 'aac', 'pdf', 'docx', 'txt', 'html', 'epub', 'odt', 'pages'}
+CONVERTED_FOLDER = os.path.join(BASE_DIR, 'converted')
+IMAGE_FORMATS = {'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'}
+VIDEO_FORMATS = {'mp4', 'avi', 'mkv', 'mov', 'webm'}
+AUDIO_FORMATS = {'mp3', 'wav', 'ogg', 'aac'}
+DOCUMENT_FORMATS = {'pdf', 'docx', 'txt', 'html', 'epub', 'odt', 'pages'}
+
+ALLOWED_EXTENSIONS = IMAGE_FORMATS | VIDEO_FORMATS | AUDIO_FORMATS | DOCUMENT_FORMATS
+
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['CONVERTED_FOLDER'] = CONVERTED_FOLDER
+
+# Erstelle benötigte Ordner
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
 # ** Datenbank-Modelle definieren **
 class User(db.Model):
@@ -32,6 +45,13 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)  # Passwort wird jetzt gehasht gespeichert!
 
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), nullable=False, default="random")
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.now)
+
 # ** Datenbank erstellen, falls nicht vorhanden **
 with app.app_context():
     db.create_all()
@@ -40,6 +60,37 @@ with app.app_context():
 user_data = {
     "Test12": {"password": generate_password_hash("12345"), "role": "Administrator"},
 }
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_valid_conversion(input_ext, target_ext):
+    """Prüft, ob eine Konvertierung innerhalb derselben Dateigruppe möglich ist"""
+    if input_ext in IMAGE_FORMATS and target_ext in IMAGE_FORMATS:
+        return True
+    if input_ext in VIDEO_FORMATS and target_ext in VIDEO_FORMATS:
+        return True
+    if input_ext in AUDIO_FORMATS and target_ext in AUDIO_FORMATS:
+        return True
+    if input_ext in DOCUMENT_FORMATS and target_ext in DOCUMENT_FORMATS:
+        return True
+    return False
+
+def convert_file(filepath, target_format):
+    """Simuliert eine Konvertierung durch Umbenennen der Datei"""
+    filename, ext = os.path.splitext(os.path.basename(filepath))
+    input_format = ext.lstrip('.').lower()
+
+    if not is_valid_conversion(input_format, target_format):
+        return None  # Ungültige Konvertierung
+
+    new_filename = f"{filename}_converted.{target_format}"
+    converted_path = os.path.join(app.config['CONVERTED_FOLDER'], new_filename)
+
+    # Simulierte Konvertierung: Datei kopieren und umbenennen
+    shutil.copy(filepath, converted_path)
+    
+    return new_filename  # Gibt den neuen Dateinamen zurück
 
 @app.route('/')
 def homepage():
@@ -120,38 +171,85 @@ def register():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_valid_conversion(input_ext, target_ext):
+    """Prüft, ob eine Konvertierung innerhalb derselben Dateigruppe möglich ist"""
+    if input_ext in IMAGE_FORMATS and target_ext in IMAGE_FORMATS:
+        return True
+    if input_ext in VIDEO_FORMATS and target_ext in VIDEO_FORMATS:
+        return True
+    if input_ext in AUDIO_FORMATS and target_ext in AUDIO_FORMATS:
+        return True
+    if input_ext in DOCUMENT_FORMATS and target_ext in DOCUMENT_FORMATS:
+        return True
+    return False
+
+def convert_file(filepath, target_format):
+    """Simuliert eine Konvertierung durch Umbenennen der Datei"""
+    filename, ext = os.path.splitext(os.path.basename(filepath))
+    input_format = ext.lstrip('.').lower()
+
+    if not is_valid_conversion(input_format, target_format):
+        return None  # Ungültige Konvertierung
+
+    new_filename = f"{filename}_converted.{target_format}"
+    converted_path = os.path.join(app.config['CONVERTED_FOLDER'], new_filename)
+
+    # Simulierte Konvertierung: Datei kopieren und umbenennen
+    shutil.copy(filepath, converted_path)
+    
+    return new_filename  # Gibt den neuen Dateinamen zurück
+
 @app.route('/convert')
 def convert():
     return render_template('convert.html')
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('Keine Datei ausgewählt.', 'error')
-            return redirect(request.url)
+    if 'file' not in request.files:
+        flash('Keine Datei ausgewählt.', 'error')
+        return redirect(url_for('convert'))
 
-        file = request.files['file']
+    file = request.files['file']
+    target_format = request.form.get('format')
 
-        if file.filename == '':
-            flash('Keine Datei ausgewählt.', 'error')
-            return redirect(request.url)
+    if file.filename == '':
+        flash('Keine Datei ausgewählt.', 'error')
+        return redirect(url_for('convert'))
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            flash('Datei erfolgreich hochgeladen!', 'success')
-            return redirect(url_for('uploaded_file', filename=filename))
+    if not target_format or target_format not in ALLOWED_EXTENSIONS:
+        flash('Ungültiges oder fehlendes Zielformat.', 'error')
+        return redirect(url_for('convert'))
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        # Prüfen, ob die Konvertierung erlaubt ist
+    input_format = filename.rsplit('.', 1)[1].lower()
+    if not is_valid_conversion(input_format, target_format):
+        flash(f'Konvertierung von {input_format.upper()} zu {target_format.upper()} nicht erlaubt!', 'error')
+        return redirect(url_for('convert'))
+
+
+        # Datei konvertieren
+        converted_filename = convert_file(filepath, target_format)
+
+        if converted_filename:
+            flash('Datei erfolgreich konvertiert!', 'success')
+            return redirect(url_for('download_file', filename=converted_filename))
         else:
-            flash('Ungültiger Dateityp.', 'error')
-            return redirect(request.url)
+            flash('Konvertierung fehlgeschlagen.', 'error')
 
-    return render_template('upload.html')
+    flash('Ungültiger Dateityp.', 'error')
+    return redirect(url_for('convert'))
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['CONVERTED_FOLDER'], filename, as_attachment=True)
 
 # ** Admin-Seite **
 @app.route('/admin')
@@ -179,6 +277,30 @@ def shop():
 @login_required
 def soziales():
     return render_template('soziales.html')
+
+@app.route('/get_messages')
+def get_messages():
+    messages = ChatMessage.query.order_by(ChatMessage.timestamp.desc()).limit(50).all()
+    return jsonify([
+        {"text": msg.text, "category": msg.category, "timestamp": msg.timestamp.strftime("%H:%M"), "username": msg.username}
+        for msg in messages
+    ])
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    if not session.get('logged_in'):
+        return jsonify({"error": "Nicht eingeloggt"}), 403
+
+    text = request.form.get("text")
+    category = request.form.get("category", "random")
+    username = session.get("username", "Gast")
+
+    if text:
+        new_message = ChatMessage(username=username, text=text, category=category)
+        db.session.add(new_message)
+        db.session.commit()
+        return jsonify({"success": True})
+    return jsonify({"error": "Nachricht darf nicht leer sein"}), 400
 
 @app.route('/profile')
 @login_required

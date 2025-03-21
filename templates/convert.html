@@ -1,61 +1,77 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <!-- Projektverwaltung -->
-<div class="convert-interface">
-    <h2>Dateiconverter</h2>
-    <table>
-        <thead>
-            <tr>
+    <div class="convert-interface">
+        <h2>Dateikonverter</h2>
+        <table>
+            <thead>
+                <tr>
                     <th>Upload</th>
                     <th>Download</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>
-                    <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
-                        <label for="file-upload" class="custom-file-upload">
-                            Datei auswählen
-                        </label>
-                        <input id="file-upload" type="file" name="file" required onchange="updateFileName(this)">
-                        
-                        <!-- Hier wird der Dateiname angezeigt -->
-                        <span id="file-name">Keine Datei ausgewählt</span>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <form id="upload-form" action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+                            <label for="file-upload" class="custom-file-upload">
+                                Datei auswählen
+                            </label>
+                            <input id="file-upload" type="file" name="file" required onchange="updateFileName(this)">
 
-                        <button type="submit" class="btn-convert">Konvertieren</button>
+                            <!-- Hier wird der Dateiname angezeigt -->
+                            <span id="file-name">Keine Datei ausgewählt</span>
 
-                        <!-- Dropdown für Dateiformate -->
-                        <select name="format" class="dropdown-format">
-                            <option>Format</option>
-                            <option value="pdf">PDF</option>
-                            <option value="docx">DOCX</option>
-                            <option value="txt">TXT</option>
-                            <option value="jpg">JPG</option>
-                            <option value="png">PNG</option>
-                            <option value="gif">GIF</option>
-                            <option value="bmp">BMP</option>
-                            <option value="webp">WEBP</option>
-                            <option value="mp4">MP4</option>
-                            <option value="avi">AVI</option>
-                            <option value="mkv">MKV</option>
-                            <option value="mov">MOV</option>
-                            <option value="webm">WEBM</option>
-                            <option value="mp3">MP3</option>
-                            <option value="wav">WAV</option>
-                            <option value="ogg">OGG</option>
-                            <option value="aac">AAC</option>
-                            <option value="html">HTML</option>
-                            <option value="epub">EPUB</option>
-                            <option value="odt">ODT</option>
-                            <option value="pages">PAGES</option>
-                        </select>
+                            <!-- Dropdown für Dateiformate -->
+                            <select name="format" class="dropdown-format" required>
+                                <option value="" disabled selected>Zielformat wählen</option>
+                                <option value="pdf">PDF</option>
+                                <option value="docx">DOCX</option>
+                                <option value="txt">TXT</option>
+                                <option value="jpg">JPG</option>
+                                <option value="png">PNG</option>
+                                <option value="gif">GIF</option>
+                                <option value="bmp">BMP</option>
+                                <option value="webp">WEBP</option>
+                                <option value="mp4">MP4</option>
+                                <option value="avi">AVI</option>
+                                <option value="mkv">MKV</option>
+                                <option value="mov">MOV</option>
+                                <option value="webm">WEBM</option>
+                                <option value="mp3">MP3</option>
+                                <option value="wav">WAV</option>
+                                <option value="ogg">OGG</option>
+                                <option value="aac">AAC</option>
+                                <option value="html">HTML</option>
+                                <option value="epub">EPUB</option>
+                                <option value="odt">ODT</option>
+                                <option value="pages">PAGES</option>
+                            </select>
 
-                    </form>                    
-                </td>
-                <td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+                            <button type="submit" class="btn-convert">Konvertieren</button>
+                        </form>                    
+                    </td>
+                    <td>
+                        <a id="download-link" style="display:none" class="btn-download">Herunterladen</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function updateFileName(input) {
+            let fileName = input.files.length > 0 ? input.files[0].name : "Keine Datei ausgewählt";
+            document.getElementById("file-name").textContent = fileName;
+        }
+
+        document.getElementById("upload-form").onsubmit = function() {
+            setTimeout(() => {
+                let downloadLink = document.getElementById("download-link");
+                if (downloadLink.href) {
+                    downloadLink.click();
+                }
+            }, 2000);
+        };
+    </script>
 {% endblock %}
