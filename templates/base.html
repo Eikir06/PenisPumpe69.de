@@ -24,7 +24,7 @@
             <img id="dark-light-toggle" src="static/images/dark_light_mode.svg" alt="Dark/Light Mode" onclick="toggleDarkMode()">
             <!-- Profil-Icon mit Dropdown-Menü -->
             <div class="profile-dropdown">
-                <img id="profileIcon" src="static/images/profile.svg" data-username="{{ session.username }}" alt="Profil" class="profile-icon" id="profileIcon">
+                <img id="profileIcon" src="static/images/profile-icon.svg" data-username="{{ session.username }}" alt="Profil" class="profile-icon" id="profileIcon">
                 <div class="dropdown-content" id="dropdownMenu">
                     {% if session.get('logged_in') %}
                         <a href="/profile">Profil</a>
