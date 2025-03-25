@@ -9,14 +9,13 @@
 
     <!-- Profildetails -->
     <div class="profile-details">
-        <h1>Max Mustermann</h1>
-        <p>Vorname</p>
-        <p>Nachname</p>
-        <p>Benutzername</p>
-        <p>Passwort</p>
-        <p>Email: max.mustermann@example.com</p>
-        <p>Mitglied seit: 01.01.2024</p>
-        <button class="btn-custom">Profil bearbeiten</button>
+        <h1>{{ user.prename }} {{ user.lastname }}</h1>
+        <p><strong>Benutzername:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Passwort:</strong> •••••••••••</p>
+        <p><strong>Mitgliedsnummer:</strong> {{ user.mitgliedsnummer }}</p>        
+        <p><strong>Mitglied seit:</strong> {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+        <a href="{{ url_for('edit_profile') }}" class="btn-custom">Profil bearbeiten</a>
         <button class="btn-profile-delete">Profil löschen</button>
     </div>
 </div>

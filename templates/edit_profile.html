@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="profile-edit-container">
+    <h2>Profil bearbeiten</h2>
+    <form method="POST">
+        <label>Vorname:</label>
+        <input type="text" name="prename" value="{{ user.prename }}" required>
+
+        <label>Nachname:</label>
+        <input type="text" name="lastname" value="{{ user.lastname }}" required>
+
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ user.email }}" required>
+
+        <label>Neues Passwort (optional):</label>
+        <input type="password" name="password" placeholder="Neues Passwort eingeben">
+
+        <button type="submit" class="btn-custom">Speichern</button>
+    </form>
+</div>
+{% endblock %}

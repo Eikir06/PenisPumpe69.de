@@ -39,11 +39,13 @@ os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 # ** Datenbank-Modelle definieren **
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    mitgliedsnummer = db.Column(db.Integer, unique=True)
     prename = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)  # Passwort wird jetzt gehasht gespeichert!
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)  # NEU
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -108,7 +110,7 @@ def login():
         if user and check_password_hash(user.password, password):
             session['logged_in'] = True
             session['username'] = user.username
-            session['role'] = "Administrator" if user.username == "Test12" else "Nutzer"
+            session['role'] = "Administrator" if user.mitgliedsnummer and user.mitgliedsnummer <= 5 else "Nutzer"
             flash('Erfolgreich eingeloggt!', 'success')
             return redirect(url_for('homepage'))
         
@@ -142,7 +144,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# ** Registrierungsseite mit Passwort-Hashing **
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -157,8 +158,25 @@ def register():
             flash('Benutzername bereits vergeben!', 'error')
             return redirect(url_for('register'))
 
+        # Passwort hashen
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
-        new_user = User(prename=prename, lastname=lastname, username=username, email=email, password=hashed_password)
+
+        # ➕ Auto-Mitgliedsnummer vergeben (höchste + 1)
+        letzter_user = User.query.order_by(User.mitgliedsnummer.desc()).first()
+        naechste_nummer = letzter_user.mitgliedsnummer + 1 if letzter_user and letzter_user.mitgliedsnummer else 1
+
+        role = "Administrator" if naechste_nummer <= 5 else "Nutzer"
+
+        # Benutzer erstellen inkl. Mitgliedsnummer
+        new_user = User(
+            mitgliedsnummer=naechste_nummer,
+            prename=prename,
+            lastname=lastname,
+            username=username,
+            email=email,
+            password=hashed_password
+        )
+
         db.session.add(new_user)
         db.session.commit()
 
@@ -166,6 +184,7 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
 
 # ** Datei-Upload-Funktionen **
 def allowed_file(filename):
@@ -305,7 +324,30 @@ def send_message():
 @app.route('/profile')
 @login_required
 def profile():
-    return render_template('profile.html')
+    user = User.query.filter_by(username=session.get("username")).first()
+    return render_template('profile.html', user=user)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    user = User.query.filter_by(username=session.get("username")).first()
+
+    if request.method == 'POST':
+        user.prename = request.form['prename']
+        user.lastname = request.form['lastname']
+        user.email = request.form['email']
+
+        # Optionales Passwort-Feld prüfen
+        new_password = request.form.get('password')
+        if new_password:
+            user.password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=16)
+
+        db.session.commit()
+        flash("Profil wurde aktualisiert.", "success")
+        return redirect(url_for('profile'))
+
+    return render_template('edit_profile.html', user=user)
+
 
 @app.route('/impressum')
 def impressum():
