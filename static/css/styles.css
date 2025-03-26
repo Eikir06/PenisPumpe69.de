@@ -746,4 +746,82 @@ input[type="file"] {
     cursor: pointer;
 }
 
+/* Profil bearbeiten Seite */
+.profile-edit-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-edit-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: black;
+}
+
+.profile-edit-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.profile-edit-container label {
+    font-weight: bold;
+    color: #333;
+}
+
+.profile-edit-container input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.profile-edit-container input:focus {
+    border-color: #0277bd;
+    outline: none;
+}
+
+.btn-custom {
+    background: #0277bd;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-custom:hover {
+    background: #01579b;
+}
+
+/* Dark Mode */
+body.dark-mode .profile-edit-container {
+    background: #37474f;
+    color: white;
+}
+
+body.dark-mode .profile-edit-container label {
+    color: white;
+}
+
+body.dark-mode .profile-edit-container input {
+    background: #455a64;
+    color: white;
+    border: 1px solid #90a4ae;
+}
+
+body.dark-mode .profile-edit-container input:focus {
+    border-color: #4fc3f7;
+}
+
+body.dark-mode .profile-edit-container h2 {
+    color: white;
+}
 

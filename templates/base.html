@@ -28,9 +28,9 @@
                 <div class="dropdown-content" id="dropdownMenu">
                     {% if session.get('logged_in') %}
                         <a href="/profile">Profil</a>
-                        <a href="/logout">Abmelden</a>
                             {% if session.get('role') == 'Administrator' %}
-                                <a href="/admin">Adminbereich</a>  
+                                <a href="/admin">Adminbereich</a> 
+                        <a href="/logout">Abmelden</a>         
                             {% endif %}
 
                     {% else %}
