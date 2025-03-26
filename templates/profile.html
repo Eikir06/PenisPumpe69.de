@@ -1,11 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="profile-container">
-    <!-- Profilbild -->
-    <div class="profile-image">
-        <img src="{{ url_for('static', filename='images/profile-icon.svg') }}" alt="Profilbild">
+<!-- Profilbild -->
+<div class="profile-image" style="text-align:center;">
+    <img src="{% if user.profile_image %}{{ url_for('static', filename='profile_pics/' ~ user.profile_image) }}{% else %}{{ url_for('static', filename='images/default_profile.png') }}{% endif %}"
+    alt="Profilbild" width="128" height="128" style="border-radius: 50%; object-fit: cover;">
+
+
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_profile_image') }}" style="margin-top: 10px;">
+        <label for="profile_image"><strong>Profilbild ändern:</strong></label>
+        <input type="file" name="profile_image" accept="image/*" required>
+        <button type="submit" class="btn-custom">Hochladen</button>
+    </form>
 </div>
+
+
 
     <!-- Profildetails -->
     <div class="profile-details">

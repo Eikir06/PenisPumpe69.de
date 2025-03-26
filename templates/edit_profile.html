@@ -4,6 +4,9 @@
 <div class="profile-edit-container">
     <h2>Profil bearbeiten</h2>
     <form method="POST">
+        <label>Benutzername:</label>
+        <input type="text" name="username" value="{{ user.username }}" required>
+
         <label>Vorname:</label>
         <input type="text" name="prename" value="{{ user.prename }}" required>
 

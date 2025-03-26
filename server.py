@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from PIL import Image
 import os
 import shutil
 import datetime
@@ -45,6 +46,7 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)  # Passwort wird jetzt gehasht gespeichert!
+    profile_image = db.Column(db.String(255), nullable=True, default="static/images/default_profile.png")
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)  # NEU
 
 class ChatMessage(db.Model):
@@ -57,11 +59,6 @@ class ChatMessage(db.Model):
 # ** Datenbank erstellen, falls nicht vorhanden **
 with app.app_context():
     db.create_all()
-
-# ** Benutzer-Datenbank (Test-Benutzer) **
-user_data = {
-    "Test12": {"password": generate_password_hash("12345"), "role": "Administrator"},
-}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -330,12 +327,59 @@ def profile():
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    current_username = session.get("username")
+    user = User.query.filter_by(username=current_username).first()
+
+    if request.method == 'POST':
+        new_username = request.form['username']
+
+        # Prüfen, ob neuer Username bereits vergeben ist (außer er bleibt gleich)
+        if new_username != user.username:
+            if User.query.filter_by(username=new_username).first():
+                flash('Benutzername ist bereits vergeben.', 'error')
+                return redirect(url_for('edit_profile'))
+            user.username = new_username
+            session['username'] = new_username  # Session aktualisieren
+
+        user.prename = request.form['prename']
+        user.lastname = request.form['lastname']
+        user.email = request.form['email']
+
+        # Optionales Passwort-Feld prüfen
+        new_password = request.form.get('password')
+        if new_password:
+            user.password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=16)
+        # Profilbild speichern
+        if 'profile_image' in request.files:
+            image_file = request.files['profile_image']
+            if image_file and image_file.filename != '':
+                filename = f"profile_{user.id}.png"
+                image_path = os.path.join('static', 'profile_images', filename)
+
+                # Verzeichnis anlegen
+                os.makedirs(os.path.dirname(image_path), exist_ok=True)
+
+                # Bild verarbeiten
+                img = Image.open(image_file)
+                img = img.convert("RGB")
+                img = img.resize((512, 512))
+                img.save(image_path)
+
+                user.profile_image = image_path
+
+        db.session.commit()
+        flash("Profil wurde aktualisiert.", "success")
+        return redirect(url_for('profile'))
+
+    return render_template('edit_profile.html', user=user)
+
     user = User.query.filter_by(username=session.get("username")).first()
 
     if request.method == 'POST':
         user.prename = request.form['prename']
         user.lastname = request.form['lastname']
         user.email = request.form['email']
+        
 
         # Optionales Passwort-Feld prüfen
         new_password = request.form.get('password')
@@ -352,6 +396,43 @@ def edit_profile():
 @app.route('/impressum')
 def impressum():
     return render_template('impressum.html')
+
+@app.route('/upload_profile_image', methods=['POST'])
+@login_required
+def upload_profile_image():
+    if 'profile_image' not in request.files:
+        flash('Kein Bild ausgewählt.', 'error')
+        return redirect(url_for('profile'))
+
+    image = request.files['profile_image']
+    if image.filename == '':
+        flash('Kein Bild ausgewählt.', 'error')
+        return redirect(url_for('profile'))
+
+    if image:
+        filename = secure_filename(image.filename)
+        ext = filename.rsplit('.', 1)[1].lower()
+        new_filename = f"profile_{session['username']}.{ext}"
+        path = os.path.join('static/uploads', new_filename)
+        full_path = os.path.join(os.getcwd(), path)
+
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        image.save(full_path)
+
+        # Zuschneiden auf 512x512
+        img = Image.open(full_path)
+        img = img.resize((512, 512))
+        img.save(full_path)
+
+        # Datenbank aktualisieren
+        user = User.query.filter_by(username=session['username']).first()
+        user.profile_image = path
+        db.session.commit()
+
+        flash("Profilbild aktualisiert!", "success")
+    return redirect(url_for('profile'))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
