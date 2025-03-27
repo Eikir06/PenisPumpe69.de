@@ -1,6 +1,37 @@
 {% extends 'base.html' %}
-
 {% block content %}
-    <h1>Adminbereich</h1>
-    <p>In diesem Bereich werden irgendwann User-Profile einsehbar sein.</p>
+<h1>Adminbereich</h1>
+
+<div class="box-container">
+    <h2>Benutzerverwaltung</h2>
+
+    <ul class="portfolio-list">
+        {% for user in users %}
+        <li class="portfolio-item" onclick="toggleDetails('user{{ user.id }}')">
+            <span>{{ user.prename }} {{ user.lastname }} – Mitglied #{{ user.mitgliedsnummer }}</span>
+            <img class="expand-icon" src="{{ url_for('static', filename='images/expand.svg') }}" alt="Expand">
+        </li>
+        <div id="user{{ user.id }}" class="portfolio-details">
+            <div class="portfolio-text">
+                <h3>{{ user.username }}</h3>
+                <p><strong>Mitgliedsnummer:</strong> {{ user.mitgliedsnummer }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Mitglied seit:</strong> {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+                <div class="admin-buttons">
+                    <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" style="display:inline;">
+                        <button type="submit" class="danger">Konto löschen</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin_reset_password', user_id=user.id) }}" style="display:inline;">
+                        <button type="submit" class="warning">Passwort zurücksetzen</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin_delete_profile_image', user_id=user.id) }}" style="display:inline;">
+                        <button type="submit" class="neutral">Profilbild entfernen</button>
+                    </form>
+                </div>
+            </div>
+            <img src="{{ url_for('static', filename='images/' + (user.profile_image if user.profile_image else 'default_profile.png')) }}" alt="Profilbild von {{ user.username }}">
+        </div>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

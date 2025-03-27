@@ -102,7 +102,6 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        # Prüfe zuerst, ob der Benutzer in der Datenbank existiert
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
@@ -111,17 +110,9 @@ def login():
             session['role'] = "Administrator" if user.mitgliedsnummer and user.mitgliedsnummer <= 5 else "Nutzer"
             flash('Erfolgreich eingeloggt!', 'success')
             return redirect(url_for('homepage'))
-        
-        # Falls der Benutzer nicht in der DB ist, prüfe das Test-Dictionary
-        elif username in user_data and check_password_hash(user_data[username]["password"], password):
-            session['logged_in'] = True
-            session['username'] = username
-            session['role'] = user_data[username]["role"]
-            flash('Erfolgreich eingeloggt! (Testmodus)', 'success')
-            return redirect(url_for('homepage'))
-
         else:
-            flash('Ungültige Anmeldedaten. Bitte versuchen Sie es erneut.', 'error')
+            flash('Ungültiger Benutzername oder Passwort.', 'error')
+            return redirect(url_for('login'))
 
     return render_template('login.html')
 
@@ -152,8 +143,12 @@ def register():
         password = request.form['password']
 
         existing_user = User.query.filter_by(username=username).first()
+        existing_email = User.query.filter_by(email=email).first()
         if existing_user:
             flash('Benutzername bereits vergeben!', 'error')
+            return redirect(url_for('register'))
+        if existing_email:
+            flash('E-Mail-Adresse wird bereits verwendet!', 'error')
             return redirect(url_for('register'))
 
         # Passwort hashen
@@ -268,14 +263,15 @@ def upload_file():
 def download_file(filename):
     return send_from_directory(app.config['CONVERTED_FOLDER'], filename, as_attachment=True)
 
-# ** Admin-Seite **
 @app.route('/admin')
 @login_required
 def admin():
     if session.get('role') != 'Administrator':
         flash('Zugriff verweigert: Nur Administratoren dürfen diese Seite aufrufen.', 'error')
         return redirect(url_for('homepage'))
-    return render_template('admin.html')
+    
+    users = User.query.all()
+    return render_template('admin.html', users=users)
 
 # ** Beispielseiten **
 @app.route('/portfolio')
@@ -429,6 +425,64 @@ def upload_profile_image():
 
         flash('Profilbild erfolgreich aktualisiert!', 'success')
         return redirect(url_for('profile'))
+
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    if session.get('role') != 'Administrator':
+        flash("Zugriff verweigert!", "error")
+        return redirect(url_for('admin'))
+
+    user = User.query.get(user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        flash("Benutzer wurde gelöscht.", "success")
+    else:
+        flash("Benutzer nicht gefunden.", "error")
+
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/reset_password/<int:user_id>', methods=['POST'])
+@login_required
+def admin_reset_password(user_id):
+    if session.get('role') != 'Administrator':
+        flash("Zugriff verweigert!", "error")
+        return redirect(url_for('admin'))
+
+    user = User.query.get(user_id)
+    if user:
+        default_pw = generate_password_hash("12345678", method='pbkdf2:sha256', salt_length=16)
+        user.password = default_pw
+        db.session.commit()
+        flash("Passwort wurde zurückgesetzt (neues Passwort: 12345678)", "success")
+    else:
+        flash("Benutzer nicht gefunden.", "error")
+
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/delete_profile_image/<int:user_id>', methods=['POST'])
+@login_required
+def admin_delete_profile_image(user_id):
+    if session.get('role') != 'Administrator':
+        flash("Zugriff verweigert!", "error")
+        return redirect(url_for('admin'))
+
+    user = User.query.get(user_id)
+    if user and user.profile_image:
+        image_path = os.path.join('static', 'images', user.profile_image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+        user.profile_image = None
+        db.session.commit()
+        flash("Profilbild gelöscht.", "success")
+    else:
+        flash("Kein Profilbild vorhanden.", "error")
+
+    return redirect(url_for('admin'))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
