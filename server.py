@@ -45,9 +45,10 @@ class User(db.Model):
     lastname = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)  # Passwort wird jetzt gehasht gespeichert!
-    profile_image = db.Column(db.String(255), nullable=True, default="static/images/default_profile.png")
-    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)  # NEU
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    password = db.Column(db.String(255), nullable=False)  # Passwort wird jetzt gehasht gespeichert!      # NEU
+    profile_image = db.Column(db.String(255), nullable=True)  # <--- HINZUFÜGEN
+
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -404,35 +405,30 @@ def upload_profile_image():
         flash('Kein Bild ausgewählt.', 'error')
         return redirect(url_for('profile'))
 
-    image = request.files['profile_image']
-    if image.filename == '':
+    file = request.files['profile_image']
+    if file.filename == '':
         flash('Kein Bild ausgewählt.', 'error')
         return redirect(url_for('profile'))
 
-    if image:
-        filename = secure_filename(image.filename)
-        ext = filename.rsplit('.', 1)[1].lower()
-        new_filename = f"profile_{session['username']}.{ext}"
-        path = os.path.join('static/uploads', new_filename)
-        full_path = os.path.join(os.getcwd(), path)
+    if file:
+        filename = f"{session['username']}_profile.png"
+        image_folder = os.path.join(app.static_folder, 'images')
+        os.makedirs(image_folder, exist_ok=True)
+        filepath = os.path.join(image_folder, filename)
 
-        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        # Bild speichern & zuschneiden
+        image = Image.open(file)
+        image = image.convert('RGB')  # Einheitliches Format
+        image = image.resize((512, 512))
+        image.save(filepath)
 
-        image.save(full_path)
-
-        # Zuschneiden auf 512x512
-        img = Image.open(full_path)
-        img = img.resize((512, 512))
-        img.save(full_path)
-
-        # Datenbank aktualisieren
+        # DB updaten
         user = User.query.filter_by(username=session['username']).first()
-        user.profile_image = path
+        user.profile_image = filename
         db.session.commit()
 
-        flash("Profilbild aktualisiert!", "success")
-    return redirect(url_for('profile'))
-
+        flash('Profilbild erfolgreich aktualisiert!', 'success')
+        return redirect(url_for('profile'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
