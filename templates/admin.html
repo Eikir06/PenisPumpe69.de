@@ -18,9 +18,10 @@
                 <p><strong>Email:</strong> {{ user.email }}</p>
                 <p><strong>Mitglied seit:</strong> {{ user.created_at.strftime('%d.%m.%Y') }}</p>
                 <div class="admin-buttons">
-                    <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" style="display:inline;">
-                        <button type="submit" class="danger">Konto löschen</button>
-                    </form>
+                    <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" style="display:inline;" onsubmit="return confirmDelete({{ user.id }})">
+                        <input type="hidden" name="admin_password" id="admin_password_{{ user.id }}">
+                        <button class="btn-delete" onclick="confirmDelete('{{ user.username }}')">Konto löschen</button>
+                    </form>                    
                     <form method="POST" action="{{ url_for('admin_reset_password', user_id=user.id) }}" style="display:inline;">
                         <button type="submit" class="warning">Passwort zurücksetzen</button>
                     </form>

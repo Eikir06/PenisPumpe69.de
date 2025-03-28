@@ -131,4 +131,32 @@ function sendMessage() {
     }
 }
 
+
+function confirmDelete(username) {
+    const password = prompt("Bitte gib dein Admin-Passwort ein, um dieses Konto zu löschen:");
+    if (password === null || password.trim() === "") return;
+
+    fetch('/admin/delete_account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: username, password: password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Konto erfolgreich gelöscht. Du wirst jetzt ausgeloggt.");
+            window.location.href = "/";
+        } else {
+            alert(data.message || "Löschen fehlgeschlagen.");
+        }
+    })
+    .catch(err => {
+        console.error("Fehler beim Löschen:", err);
+        alert("Ein Fehler ist aufgetreten.");
+    });
+}
+
+
 renderMessages();

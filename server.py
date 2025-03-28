@@ -6,11 +6,14 @@ from PIL import Image
 import os
 import shutil
 import datetime
+from datetime import timedelta
+import secrets
 
 app = Flask(__name__)
 
-# ** Secret Key für Sessions & Flash Messages **
-app.secret_key = 'supersecretkey'
+app.permanent_session_lifetime = timedelta(minutes=20)
+
+app.secret_key = secrets.token_hex(16)
 
 # ** SQLite-Datenbank einbinden **
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -105,6 +108,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
+            session.permanent = True
             session['logged_in'] = True
             session['username'] = user.username
             session['role'] = "Administrator" if user.mitgliedsnummer and user.mitgliedsnummer <= 5 else "Nutzer"
@@ -433,16 +437,48 @@ def admin_delete_user(user_id):
         flash("Zugriff verweigert!", "error")
         return redirect(url_for('admin'))
 
-    user = User.query.get(user_id)
-    if user:
-        db.session.delete(user)
+    entered_pw = request.form.get("admin_password")
+    current_user = User.query.filter_by(username=session['username']).first()
+
+    if not check_password_hash(current_user.password, entered_pw):
+        flash("Falsches Passwort. Löschung abgebrochen.", "error")
+        return redirect(url_for('admin'))
+
+    user_to_delete = User.query.get(user_id)
+    if user_to_delete:
+        db.session.delete(user_to_delete)
         db.session.commit()
         flash("Benutzer wurde gelöscht.", "success")
+        return redirect(url_for('logout'))  # Admin wird ausgeloggt
     else:
         flash("Benutzer nicht gefunden.", "error")
 
     return redirect(url_for('admin'))
 
+@app.route('/admin/delete_account', methods=['POST'])
+def admin_delete_account():
+    if not session.get('logged_in') or session.get('role') != 'Administrator':
+        return jsonify({"success": False, "message": "Nicht autorisiert."}), 403
+
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    admin = User.query.filter_by(username=session.get('username')).first()
+
+    if not admin or not check_password_hash(admin.password, password):
+        return jsonify({"success": False, "message": "Falsches Passwort."})
+
+    if username == session.get('username'):
+        return jsonify({"success": False, "message": "Du kannst dich nicht selbst löschen."})
+
+    user_to_delete = User.query.filter_by(username=username).first()
+    if not user_to_delete:
+        return jsonify({"success": False, "message": "Benutzer nicht gefunden."})
+
+    db.session.delete(user_to_delete)
+    db.session.commit()
+    return jsonify({"success": True})
 
 @app.route('/admin/reset_password/<int:user_id>', methods=['POST'])
 @login_required
