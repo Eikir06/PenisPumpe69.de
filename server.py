@@ -15,14 +15,12 @@ app.permanent_session_lifetime = timedelta(minutes=20)
 
 app.secret_key = secrets.token_hex(16)
 
-# ** SQLite-Datenbank einbinden **
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'database.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# ** Upload-Konfiguration **
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 CONVERTED_FOLDER = os.path.join(BASE_DIR, 'converted')
 IMAGE_FORMATS = {'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'}
@@ -36,11 +34,9 @@ ALLOWED_EXTENSIONS = IMAGE_FORMATS | VIDEO_FORMATS | AUDIO_FORMATS | DOCUMENT_FO
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['CONVERTED_FOLDER'] = CONVERTED_FOLDER
 
-# Erstelle benötigte Ordner
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-# ** Datenbank-Modelle definieren **
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     mitgliedsnummer = db.Column(db.Integer, unique=True)
@@ -60,7 +56,6 @@ class ChatMessage(db.Model):
     category = db.Column(db.String(50), nullable=False, default="random")
     timestamp = db.Column(db.DateTime, default=datetime.datetime.now)
 
-# ** Datenbank erstellen, falls nicht vorhanden **
 with app.app_context():
     db.create_all()
 
@@ -85,15 +80,15 @@ def convert_file(filepath, target_format):
     input_format = ext.lstrip('.').lower()
 
     if not is_valid_conversion(input_format, target_format):
-        return None  # Ungültige Konvertierung
+        return None 
 
     new_filename = f"{filename}_converted.{target_format}"
     converted_path = os.path.join(app.config['CONVERTED_FOLDER'], new_filename)
 
-    # Simulierte Konvertierung: Datei kopieren und umbenennen
+   
     shutil.copy(filepath, converted_path)
     
-    return new_filename  # Gibt den neuen Dateinamen zurück
+    return new_filename  
 
 @app.route('/')
 def homepage():
@@ -126,7 +121,6 @@ def logout():
     flash('Sie wurden erfolgreich ausgeloggt.')
     return redirect(url_for('login'))
 
-# ** Geschützter Routen-Decorator **
 def login_required(f):
     from functools import wraps
     @wraps(f)
@@ -155,16 +149,13 @@ def register():
             flash('E-Mail-Adresse wird bereits verwendet!', 'error')
             return redirect(url_for('register'))
 
-        # Passwort hashen
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
 
-        # ➕ Auto-Mitgliedsnummer vergeben (höchste + 1)
         letzter_user = User.query.order_by(User.mitgliedsnummer.desc()).first()
         naechste_nummer = letzter_user.mitgliedsnummer + 1 if letzter_user and letzter_user.mitgliedsnummer else 1
 
         role = "Administrator" if naechste_nummer <= 5 else "Nutzer"
 
-        # Benutzer erstellen inkl. Mitgliedsnummer
         new_user = User(
             mitgliedsnummer=naechste_nummer,
             prename=prename,
@@ -183,7 +174,6 @@ def register():
     return render_template('register.html')
 
 
-# ** Datei-Upload-Funktionen **
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -208,16 +198,15 @@ def convert_file(filepath, target_format):
     input_format = ext.lstrip('.').lower()
 
     if not is_valid_conversion(input_format, target_format):
-        return None  # Ungültige Konvertierung
-
+        return None  
+        
     new_filename = f"{filename}_converted.{target_format}"
     converted_path = os.path.join(app.config['CONVERTED_FOLDER'], new_filename)
 
-    # Simulierte Konvertierung: Datei kopieren und umbenennen
     shutil.copy(filepath, converted_path)
     
-    return new_filename  # Gibt den neuen Dateinamen zurück
-
+    return new_filename  
+    
 @app.route('/convert')
 def convert():
     return render_template('convert.html')
@@ -244,14 +233,12 @@ def upload_file():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-        # Prüfen, ob die Konvertierung erlaubt ist
     input_format = filename.rsplit('.', 1)[1].lower()
     if not is_valid_conversion(input_format, target_format):
         flash(f'Konvertierung von {input_format.upper()} zu {target_format.upper()} nicht erlaubt!', 'error')
         return redirect(url_for('convert'))
 
 
-        # Datei konvertieren
         converted_filename = convert_file(filepath, target_format)
 
         if converted_filename:
@@ -277,7 +264,6 @@ def admin():
     users = User.query.all()
     return render_template('admin.html', users=users)
 
-# ** Beispielseiten **
 @app.route('/portfolio')
 def portfolio():
     return render_template('portfolio.html')
@@ -334,33 +320,29 @@ def edit_profile():
     if request.method == 'POST':
         new_username = request.form['username']
 
-        # Prüfen, ob neuer Username bereits vergeben ist (außer er bleibt gleich)
         if new_username != user.username:
             if User.query.filter_by(username=new_username).first():
                 flash('Benutzername ist bereits vergeben.', 'error')
                 return redirect(url_for('edit_profile'))
             user.username = new_username
-            session['username'] = new_username  # Session aktualisieren
+            session['username'] = new_username
 
         user.prename = request.form['prename']
         user.lastname = request.form['lastname']
         user.email = request.form['email']
 
-        # Optionales Passwort-Feld prüfen
         new_password = request.form.get('password')
         if new_password:
             user.password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=16)
-        # Profilbild speichern
+        
         if 'profile_image' in request.files:
             image_file = request.files['profile_image']
             if image_file and image_file.filename != '':
                 filename = f"profile_{user.id}.png"
                 image_path = os.path.join('static', 'profile_images', filename)
 
-                # Verzeichnis anlegen
                 os.makedirs(os.path.dirname(image_path), exist_ok=True)
 
-                # Bild verarbeiten
                 img = Image.open(image_file)
                 img = img.convert("RGB")
                 img = img.resize((512, 512))
@@ -382,7 +364,6 @@ def edit_profile():
         user.email = request.form['email']
         
 
-        # Optionales Passwort-Feld prüfen
         new_password = request.form.get('password')
         if new_password:
             user.password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=16)
@@ -416,13 +397,11 @@ def upload_profile_image():
         os.makedirs(image_folder, exist_ok=True)
         filepath = os.path.join(image_folder, filename)
 
-        # Bild speichern & zuschneiden
         image = Image.open(file)
-        image = image.convert('RGB')  # Einheitliches Format
+        image = image.convert('RGB')  
         image = image.resize((512, 512))
         image.save(filepath)
 
-        # DB updaten
         user = User.query.filter_by(username=session['username']).first()
         user.profile_image = filename
         db.session.commit()
@@ -449,7 +428,7 @@ def admin_delete_user(user_id):
         db.session.delete(user_to_delete)
         db.session.commit()
         flash("Benutzer wurde gelöscht.", "success")
-        return redirect(url_for('logout'))  # Admin wird ausgeloggt
+        return redirect(url_for('logout'))  
     else:
         flash("Benutzer nicht gefunden.", "error")
 
